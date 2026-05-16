@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Проект Сканер — Алмазный Зверь</title>
+<style>
+:root {
+--bg-color: #0b0e11;
+--card-bg: #161a1e;
+--card-border: #22262a;
+--text-main: #ffffff;
+--text-muted: #6c7a84;
+--neon-cyan: #40E0D0; 
+--neon-purple: #8a2be2;
+--ticker-color: #a366ff; 
+--num-vhod: #00d4ff;
+--num-cel: #00ff88;
+--num-stop: #FF0000; 
+}
+
+body {
+background-color: var(--bg-color);
+color: var(--text-main);
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+margin: 0;
+padding: 15px;
+display: flex;
+flex-direction: column;
+min-height: 100vh;
+box-sizing: border-box;
+}
+
+.header-panel {
+display: flex;
+flex-wrap: wrap;
+justify-content: space-between;
+align-items: center;
+background-color: var(--card-bg);
+border: 1px solid var(--card-border);
+padding: 15px 20px;
+border-radius: 6px;
+gap: 15px;
+margin-bottom: 15px;
+}
+
+.logo-area { display: flex; align-items: center; gap: 15px; }
+.title-container { display: flex; align-items: center; gap: 20px; }
+
+.bull-avatar {
+width: 60px;
+height: 60px;
+border-radius: 50%;
+border: 1px solid var(--neon-purple);
+box-shadow: 0 0 12px rgba(138, 43, 226, 0.6);
+object-fit: cover;
+display: block;
+}
+
+.progress-area { flex-grow: 1; max-width: 500px; min-width: 280px; }
+.progress-info { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; }
+.progress-bar { height: 4px; background-color: #222; border-radius: 2px; }
+.progress-fill { width: 100%; height: 100%; background-color: var(--neon-cyan); border-radius: 2px; }
+
+.btn-search {
+display: flex; align-items: center; justify-content: center; gap: 10px;
+background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 12px;
+text-transform: uppercase; font-weight: bold; box-shadow: 0 0 10px rgba(64, 224, 208, 0.1);
+}
+
+.metrics-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+gap: 12px;
+margin-bottom: 15px;
+}
+
+.card {
+background-color: var(--card-bg);
+border: none; 
+color: var(--text-muted); 
+padding: 12px; 
+cursor: pointer; 
+border-radius: 4px; 
+font-size: 11px; 
+box-sizing: border-box;
+text-decoration: none;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+}
+
+.card.active-purple {
+color: var(--text-main);
+text-shadow: 0 0 8px var(--neon-purple), 0 0 15px var(--neon-purple); 
+box-shadow: inset 0 0 10px rgba(138, 43, 226, 0.2);
+border: 1px solid var(--neon-purple); 
+}
+
+.card-label { font-size: 11px; text-transform: uppercase; }
+.card-value { font-size: 18px; font-weight: bold; }
+
+.dynamic-content {
+flex: 1;
+background-color: var(--card-bg);
+border: 1px solid var(--card-border);
+border-radius: 6px;
+padding: 15px;
+margin-bottom: 15px;
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 15px;
+}
+
+.timeframe-screen {
+background-color: #0e1216;
+border: 1px solid var(--card-border);
+border-radius: 6px;
+padding: 15px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+.screen-title {
+font-size: 11px; 
+font-weight: normal; 
+color: var(--neon-cyan);
+text-transform: uppercase;
+border-bottom: 1px solid var(--card-border);
+padding-bottom: 6px;
+margin-bottom: 4px;
+}
+
+.trade-row {
+font-size: 12px;
+font-weight: initial;
+padding: 10px;
+border-radius: 4px;
+background-color: var(--card-bg);
+display: grid;
+grid-template-columns: 24px 60px repeat(3, 1fr);
+align-items: center;
+gap: 5px;
+}
+
+.param-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.ticker-name { color: var(--ticker-color); font-size: 13px; }
+.param-muted { color: var(--text-muted); font-size: 11px; }
+
+.val-vhod { color: var(--num-vhod); font-size: 13px; }
+.val-cel { color: var(--num-cel); font-size: 13px; }
+.val-stop { color: var(--num-stop); font-size: 13px; }
+
+.copy-click { cursor: pointer; transition: opacity 0.1s ease; }
+.copy-click:active { opacity: 0.3; }
+
+.neon-diamond { display: inline-block; animation: neon-blink 1.5s infinite ease-in-out; }
+@keyframes neon-blink { 0%, 100% { opacity: 0.4; text-shadow: none; } 50% { opacity: 1; text-shadow: 0 0 8px #00ff88, 0 0 15px #00ff88; } }
+
+.footer { background-color: var(--card-bg); border: 1px solid var(--card-border); padding: 15px 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 15px; }
+.moex-header { display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; flex-wrap: wrap; gap: 10px; }
+.moex-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: initial; letter-spacing: 0.5px; }
+.moex-main-status { font-size: 11px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; font-weight: initial; background-color: #0e1216; border: 1px solid var(--card-border); }
+.status-open { color: var(--num-cel); border-color: var(--num-cel); box-shadow: 0 0 8px rgba(0, 255, 136, 0.1); }
+.status-closed { color: var(--text-muted); border-color: var(--card-border); }
+.status-weekend { color: var(--num-stop); border-color: var(--num-stop); box-shadow: 0 0 8px rgba(255, 0, 0, 0.1); }
+.moex-grid-schedule { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; width: 100%; }
+.session-item { background-color: #0e1216; border: 1px solid var(--card-border); padding: 10px 12px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+.session-item.current-active { border-color: var(--neon-cyan); box-shadow: inset 0 0 6px rgba(64, 224, 208, 0.05); }
+.session-info { display: flex; flex-direction: column; gap: 2px; }
+.session-name { font-size: 11px; text-transform: uppercase; color: var(--text-main); font-weight: initial; }
+.session-time { font-size: 10px; color: var(--text-muted); }
+.session-timer { text-align: right; display: flex; flex-direction: column; gap: 2px; }
+.timer-label { font-size: 9px; text-transform: uppercase; color: var(--text-muted); }
+.time-digits { font-family: monospace; font-size: 12px; color: var(--num-vhod); font-weight: initial; }
+.time-digits.active-now { color: var(--num-cel); }
+.time-digits.waiting { color: var(--text-muted); }
+.copyright-zone { width: 100%; text-align: center; font-size: 10px; color: var(--text-muted); border-top: 1px solid var(--card-border); padding-top: 8px; margin-top: 5px; }
+</style>
+</head>
+<body>
+
+<header class="header-panel">
+<div class="logo-area">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+<defs><filter id="neon-glow-pulse" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<path d="M2 12H6L8.5 4L12.5 20L15 9.5L17.5 13.5L19.5 11.5L22 12" stroke="#40E0D0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#neon-glow-pulse)"/>
+</svg>
+<div class="title-container">
+<div>
+<h1 style="font-size: 16px; margin: 0; text-transform: uppercase; color: var(--neon-cyan);">АЛМАЗНЫЙ ЗВЕРЬ: Поиск на МосБирже</h1>
+<p style="font-size: 11px; color: var(--text-muted); margin: 3px 0 0 0;">СИСТЕМА: РАБОТАЕТ | ЛОГИКА СЕЙКОТЫ + STRIKER V2</p>
+</div>
+<img src="https://placekitten.com" alt="Bull" class="bull-avatar">
+</div>
+</div>
+<div class="progress-area">
+<div class="progress-info" style="color: var(--text-muted);"><span>ЗАВЕРШЕНО — Проверено: 261 из 261</span><span>100%</span></div>
+<div class="progress-bar"><div class="progress-fill"></div></div>
+<div class="progress-info" style="margin-top: 5px; color: #4caf50;"><span>Найдено лучших сигналов: {{ signals|length }}</span></div>
+</div>
+<div class="search-btn-zone">
+<button class="btn-search" onclick="window.location.reload();">
+<svg width="18" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><defs><filter id="neon-glow-bolt" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#40E0D0" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#neon-glow-bolt)"/>
+</svg>
+ОБНОВИТЬ ДАННЫЕ
+</button>
+</div>
+</header>
+
+<section class="metrics-grid">
+<a href="/" class="card active-purple"><div class="card-label">💎 ТОП-Экран</div></a>
+<div class="card"><div class="card-value">2</div></div>
+<div class="card"><div class="card-value" style="color: var(--neon-cyan);">3</div></div>
+<div class="card"><div class="card-value" style="color: #4caf50;">4</div></div>
+<div class="card"><div class="card-value" style="color: #ff9800;">5</div></div>
+<div class="card"><div class="card-value" style="color: #00bcd4;">6</div></div>
+<div class="card"><div class="card-value" style="color: #f44336;">7</div></div>
+<div class="card"><div class="card-value">8</div></div>
+</section>
+
+<main class="dynamic-content">
+
+<!-- ЭКРАН 1: НЕДЕЛЬНЫЙ ТАЙМФРЕЙМ -->
+<div class="timeframe-screen">
+<div class="screen-title">✦ ТРЕНД: 1Н (Неделя)</div>
+{% for sig in signals %}
+<div class="trade-row">
+<span class="neon-diamond">💎</span>
+<span class="ticker-name copy-click" onclick="copyToClipboard(this)">{{ sig.ticker }}</span>
+<div class="param-cell"><span class="param-muted">| Вход:</span><span class="val-vhod copy-click" onclick="copyToClipboard(this)">{{ sig.entry }}</span></div>
+<div class="param-cell"><span class="param-muted">| Цель:</span><span class="val-cel copy-click" onclick="copyToClipboard(this)">{{ sig.take }}</span></div>
+<div class="param-cell"><span class="param-muted">| Стоп:</span><span class="val-stop copy-click" onclick="copyToClipboard(this)">{{ sig.stop }}</span></div>
+</div>
+{% else %}
+<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px;">Поиск сильных акций недельного тренда...</div>
+{% endfor %}
+</div>
+
+<!-- ЭКРАН 2: ДНЕВНОЙ ТАЙМФРЕЙМ -->
+<div class="timeframe-screen">
+<div class="screen-title">✦ ТРЕНД: D1 (День)</div>
+{% for sig in signals %}
+<div class="trade-row">
+<span class="neon-diamond">💎</span>
+<span class="ticker-name copy-click" onclick="copyToClipboard(this)">{{ sig.ticker }}</span>
+<div class="param-cell"><span class="param-muted">| Вход:</span><span class="val-vhod copy-click" onclick="copyToClipboard(this)">{{ sig.entry }}</span></div>
+<div class="param-cell"><span class="param-muted">| Цель:</span><span class="val-cel copy-click" onclick="copyToClipboard(this)">{{ sig.take }}</span></div>
+<div class="param-cell"><span class="param-muted">| Стоп:</span><span class="val-stop copy-click" onclick="copyToClipboard(this)">{{ sig.stop }}</span></div>
+</div>
+{% else %}
+<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px;">Поиск дневного сжатия...</div>
+{% endfor %}
+</div>
+
+<!-- ЭКРАН 3: ЧАСОВОЙ ТАЙМФРЕЙМ -->
+<div class="timeframe-screen">
+<div class="screen-title">✦ ТРЕНД: H1 (Час)</div>
+{% for sig in signals %}
+<div class="trade-row">
+<span class="neon-diamond">💎</span>
+<span class="ticker-name copy-click" onclick="copyToClipboard(this)">{{ sig.ticker }}</span>
+<div class="param-cell"><span class="param-muted">| Вход:</span><span class="val-vhod copy-click" onclick="copyToClipboard(this)">{{ sig.entry }}</span></div>
+<div class="param-cell"><span class="param-muted">| Цель:</span><span class="val-cel copy-click" onclick="copyToClipboard(this)">{{ sig.take }}</span></div>
+<div class="param-cell"><span class="param-muted">| Стоп:</span><span class="val-stop copy-click" onclick="copyToClipboard(this)">{{ sig.stop }}</span></div>
+</div>
+{% else %}
+<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px;">Поиск часового жгута EMA...</div>
+{% endfor %}
+</div>
+
+<!-- ЭКРАН 4: МИНУТНЫЙ ТАЙМФРЕЙМ -->
+<div class="timeframe-screen">
+<div class="screen-title">✦ ТРЕНД: M15 (Минут)</div>
+{% for sig in signals %}
+<div class="trade-row">
+<span class="neon-diamond">💎</span>
+<span class="ticker-name copy-click" onclick="copyToClipboard(this)">{{ sig.ticker }}</span>
+<div class="param-cell"><span class="param-muted">| Вход:</span><span class="val-vhod copy-click" onclick="copyToClipboard(this)">{{ sig.entry }}</span></div>
+<div class="param-cell"><span class="param-muted">| Цель:</span><span class="val-cel copy-click" onclick="copyToClipboard(this)">{{ sig.take }}</span></div>
+<div class="param-cell"><span class="param-muted">| Стоп:</span><span class="val-stop copy-click" onclick="copyToClipboard(this)">{{ sig.stop }}</span></div>
+</div>
+{% else %}
+<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px;">Ожидание импульсного пробоя...</div>
+{% endfor %}
+</div>
+
+</main>
+
+<footer class="footer">
+<div class="moex-header">
+<div class="moex-title">Мониторинг расписания торговых сессий (МСК)</div>
+<div id="moex-live-clock" style="font-size: 24px; font-weight: 200; color: var(--neon-cyan); font-family: monospace; letter-spacing: 1px;">00:00:00</div>
+<div id="m-global-status" class="moex-main-status">Расчет...</div>
+</div>
+
+<div class="moex-grid-schedule">
+<div id="box-s1" class="session-item">
+<div class="session-info"><span class="session-name">Утренняя сессия</span><span class="session-time">07:00 - 09:50</span></div>
+<div class="session-timer"><span id="l-s1" class="timer-label">До начала</span><span id="t-s1" class="time-digits">--:--:--</span></div>
+</div>
+<div id="box-p1" class="session-item">
+<div class="session-info"><span class="session-name">Перерыв</span><span class="session-time">09:50 - 10:00</span></div>
+<div class="session-timer"><span id="l-p1" class="timer-label">До начала</span><span id="t-p1" class="time-digits">--:--:--</span></div>
+</div>
+<div id="box-s2" class="session-item">
+<div class="session-info"><span class="session-name">Основная сессия</span><span class="session-time">10:00 - 18:50</span></div>
+<div class="session-timer"><span id="l-s2" class="timer-label">До начала</span><span id="t-s2" class="time-digits">--:--:--</span></div>
+</div>
+<div id="box-p2" class="session-item">
+<div class="session-info"><span class="session-name">Перерыв</span><span class="session-time">18:50 - 19:00</span></div>
+<div class="session-timer"><span id="l-p2" class="timer-label">До начала</span><span id="t-p2" class="time-digits">--:--:--</span></div>
+</div>
+<div id="box-s3" class="session-item">
+<div class="session-info"><span class="session-name">Вечерняя сессия</span><span class="session-time">19:00 - 23:50</span></div>
+<div class="session-timer"><span id="l-s3" class="timer-label">До начала</span><span id="t-s3" class="time-digits">--:--:--</span></div>
+</div>
+<div id="box-we" class="session-item">
+<div class="session-info"><span class="session-name">Сессия Выходного Дня</span><span class="session-time">09:50 - 19:00</span></div>
+<div class="session-timer"><span id="l-we" class="timer-label">До начала</span><span id="t-we" class="time-digits">--:--:--</span></div>
+</div>
+</div>
+
+<div class="copyright-zone">© 2026 Проект Сканер. Архитектура сквозных блоков зафиксирована.</div>
+</footer>
+
+<script>
+function copyToClipboard(element) {
+navigator.clipboard.writeText(element.innerText);
+}
+
+function fmt(s) {
+const h = Math.floor(s / 3600);
+const m = Math.floor((s % 3600) / 60);
+const sec = Math.floor(s % 60);
+return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function setTimer(id, label, sec, isAct) {
+document.getElementById('l-' + id).innerText = label;
+const dig = document.getElementById('t-' + id);
+dig.innerText = fmt(sec);
+if (isAct) {
+document.getElementById('box-' + id).className = "session-item current-active";
+dig.className = "time-digits active-now";
+} else {
+document.getElementById('box-' + id).className = "session-item";
+dig.className = "time-digits waiting";
+}
+}
+
+function setOff(id, label, text) {
+document.getElementById('l-' + id).innerText = label;
+document.getElementById('t-' + id).innerText = text;
+document.getElementById('t-' + id).className = "time-digits waiting";
+document.getElementById('box-' + id).className = "session-item";
+}
+
+function updateSchedule() {
+const gStatus = document.getElementById('m-global-status');
+const clockZone = document.getElementById('moex-live-clock');
+
+const now = new Date();
+const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+const msk = new Date(utc + (3 * 3600000));
+
+let h_clk = String(msk.getHours()).padStart(2, '0');
+let m_clk = String(msk.getMinutes()).padStart(2, '0');
+let s_clk = String(msk.getSeconds()).padStart(2, '0');
+clockZone.innerText = `${h_clk}:${m_clk}:${s_clk}`;
+
+const day = msk.getDay();
+const cur = (msk.getHours() * 3600) + (msk.getMinutes() * 60) + msk.getSeconds();
+
+const s1Start = 7 * 3600, s1End = (9 * 3600) + (50 * 60);
+const p1Start = s1End, p1End = 10 * 3600;
+const s2Start = p1End, s2End = (18 * 3600) + (50 * 60);
+const p2Start = s2End, p2End = 19 * 3600;
+const s3Start = p2End, s3End = (23 * 3600) + (50 * 60);
+const weStart = s1End, weEnd = 19 * 3600;
+
+if (day === 6 || day === 0) {
+gStatus.innerText = (day === 6) ? "Суббота: Выходной" : "Воскресенье: Выходной";
+gStatus.className = "moex-main-status status-weekend";
+setOff('s1', 'Статус', 'Закрыта'); setOff('p1', 'Статус', 'Закрыта');
+setOff('s2', 'Статус', 'Закрыта'); setOff('p2', 'Статус', 'Закрыта');
+setOff('s3', 'Статус', 'Закрыта');
+if (cur < weStart) setTimer('we', 'До открытия', weStart - cur, false);
+else if (cur >= weStart && cur < weEnd) setTimer('we', 'До закрытия', weEnd - cur, true);
+else setTimer('we', 'До открытия', (24 * 3600) - cur + weStart, false);
+return;
+}
+
+setOff('we', 'Статус', 'Только Сб/Вс');
+if (cur >= s1Start && cur < s3End) {
+gStatus.innerText = "Биржа открыта"; gStatus.className = "moex-main-status status-open";
+} else {
+gStatus.innerText = "Биржа закрыта"; gStatus.className = "moex-main-status status-closed";
+}
+
+if (cur < s1Start) setTimer('s1', 'До открытия', s1Start - cur, false);
+else if (cur >= s1Start && cur < s1End) setTimer('s1', 'До закрытия', s1End - cur, true);
+else setOff('s1', 'Статус', 'Завершена');
+
+if (cur < p1Start) setTimer('p1', 'До начала', p1Start - cur, false);
+else if (cur >= p1Start && cur < p1End) setTimer('s1', 'До конца', p1End - cur, true);
+else setOff('p1', 'Статус', 'Завершен');
+
+if (cur < s2Start) setTimer('s2', 'До открытия', s2Start - cur, false);
+else if (cur >= s2Start && cur < s2End) setTimer('s2', 'До закрытия', s2End - cur, true);
+else setOff('s2', 'Статус', 'Завершена');
+
+if (cur < p2Start) setTimer('p2', 'До начала', p2Start - cur, false);
+else if (cur >= p2Start && cur < p2End) setTimer('p2', 'До конца', p2End - cur, true);
+else setOff('p2', 'Статус', 'Завершен');
+
+if (cur < s3Start) setTimer('s3', 'До открытия', s3Start - cur, false);
+else if (cur >= s3Start && cur < s3End) setTimer('s3', 'До закрытия', s3End - cur, true);
+else { let toTomorrow = (24 * 3600) - cur + s1Start; setTimer('s3', 'До утренней', toTomorrow, false); }
+}
+
+setInterval(updateSchedule, 1000);
+updateSchedule();
+</script>
+</body>
+</html>
