@@ -195,11 +195,13 @@ gap: 5px;
 <h1 style="font-size: 16px; margin: 0; text-transform: uppercase; color: var(--neon-cyan);">АЛМАЗНЫЙ ЗВЕРЬ: Поиск на МосБирже</h1>
 <p style="font-size: 11px; color: var(--text-muted); margin: 3px 0 0 0;">СИСТЕМА: РАБОТАЕТ | ЛОГИКА СЕЙКОТЫ + STRIKER V2</p>
 </div>
-<img src="https://placekitten.com" alt="Bull" class="bull-avatar">
+<!-- Исправленный путь к аватарке быка -->
+<img src="/bull.png" alt="Bull" class="bull-avatar">
 </div>
 </div>
 <div class="progress-area">
-<div class="progress-info" style="color: var(--text-muted);"><span>ЗАВЕРШЕНО — Проверено: 261 из 261</span><span>100%</span></div>
+<!-- Динамическая шкала прогресса -->
+<div class="progress-info" style="color: var(--text-muted);"><span>ЗАВЕРШЕНО — Проверено: {{ total_count }} из {{ total_count }}</span><span>100%</span></div>
 <div class="progress-bar"><div class="progress-fill"></div></div>
 <div class="progress-info" style="margin-top: 5px; color: #4caf50;"><span>Найдено лучших сигналов: {{ signals|length }}</span></div>
 </div>
@@ -317,7 +319,7 @@ gap: 5px;
 </div>
 <div id="box-s3" class="session-item">
 <div class="session-info"><span class="session-name">Вечерняя сессия</span><span class="session-time">19:00 - 23:50</span></div>
-<div class="session-timer"><span id="l-s3" class="timer-label">До начала</span><span id="t-s3" class="time-digits">--:--:--</span></div>
+<div class="session-timer"><span id="l-s3" class="timer-label">До открытия</span><span id="t-s3" class="time-digits">--:--:--</span></div>
 </div>
 <div id="box-we" class="session-item">
 <div class="session-info"><span class="session-name">Сессия Выходного Дня</span><span class="session-time">09:50 - 19:00</span></div>
