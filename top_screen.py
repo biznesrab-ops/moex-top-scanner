@@ -82,3 +82,42 @@ def check_hourly_squeeze(ticker):
     if spread_pct < 0.3:
         return True
     return False
+
+def calculate_m15_entry(ticker):
+    # 1. Сквозная проверка всех старших экранов
+    if not get_weekly_signals(ticker): return None
+    if not check_daily_compression(ticker): return None
+    if not check_hourly_squeeze(ticker): return None
+    
+    # 2. Если старшие ТФ согласны, загружаем М15 для расчета точек
+    url = f"https://moex.com{ticker}/candles.json?interval=15"
+    response = requests.get(url).json()
+    
+    data = response['candles']['data']
+    columns = response['candles']['columns']
+    df = pd.DataFrame(data, columns=columns)
+    
+    if len(df) < 5: return None
+    
+    last_row = df.iloc[-1]
+    prev_row = df.iloc[-2]
+    
+    # Локальный Хай и Лоу для пробоя коробки
+    local_high = prev_row['high']
+    local_low = prev_row['low']
+    current_price = last_row['close']
+    
+    # 3. Условие сигнала: текущая цена пробивает хай на импульсе
+    if current_price > local_high:
+        entry = current_price
+        stop = local_low - (entry * 0.001)  # Стоп под Лоу + небольшой зазор
+        risk = entry - stop
+        take = entry + (risk * 3)           # Математика прибыли строго 1:3
+        
+        return {
+            "ticker": ticker,
+            "entry": round(entry, 2),
+            "stop": round(stop, 2),
+            "take": round(take, 2)
+        }
+    return None
